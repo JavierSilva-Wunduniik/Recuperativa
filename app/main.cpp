@@ -11,7 +11,9 @@
 #include <math.h>
 
 std::map<double, double> smi;
+std::map<double, double> smiaux;
 std::map <std::string, double> dollars;
+std::map <std::string, double> dollarsaux;
 std::map<double, double> baccano;
 std::list<double> lista;
 
@@ -51,10 +53,10 @@ auto linearRegression(std::map<double, double> m)
     auto iter = m.begin(); // Inicializando la iteracion del mapa
     while (iter != m.end()) 
     {
-        sx += iter->first; //sumatoria años salario minimo
-        sxx += pow(iter->first, 2); // x**2 - SUMA
-        sy += iter->second; //sumatoria salario minimo en dollar
-        syy += pow(iter->second, 2); // y**2 - SUMA
+        sx += iter->first;                 //sumatoria años salario minimo
+        sxx += pow(iter->first, 2);        // x**2 - SUMA
+        sy += iter->second;                //sumatoria salario minimo en dollar
+        syy += pow(iter->second, 2);       // y**2 - SUMA
         sxy += iter->first * iter->second; // Multiplica año por valor corresp del dollar
         ++iter;
     }
@@ -119,11 +121,36 @@ auto csv_dollars(char** argv)
 //Este es el "main" 
 int main(int argc, char** argv) 
 {
+
+    int nodo, comuni;
+    MPI_Init(&argc,&argv);
+    MPI_Status status;
+    MPI_Comm_rank( MPI_COMM_WORLD , &nodo);
+    MPI_Comm_size(MPI_COMM_WORLD, &comuni);
+    if (nodo==0)
+    {
+        smi = csv_smi(argv);
+        MPI_Send(&smi,0,MPI_DOUBLE ,2,0,MPI_COMM_WORLD);
+    }
+        if (nodo==1)
+    {
+        dollars = csv_dollars(argv);
+        MPI_Send(&dollars,0,MPI_DOUBLE ,2,0,MPI_COMM_WORLD);
+    }
+    if (nodo==2)
+    {
+        MPI_Recv(&smiaux,1,MPI_DOUBLE,0,0,MPI_COMM_WORLD,&status);
+        MPI_Recv(&dollarsaux,1,MPI_DOUBLE,1,0,MPI_COMM_WORLD,&status);
+        baccano = convertYear(smiaux, dollarsaux);
+        linearRegression(baccano);
+    }
+    MPI_Finalize;
+    /*
     smi = csv_smi(argv);
     dollars = csv_dollars(argv);
     baccano = convertYear(smi, dollars);
     linearRegression(baccano);
-    
+    */
     
     std::cout << std::endl;
     std::cout <<"====== Integrante ======"<< std::endl;

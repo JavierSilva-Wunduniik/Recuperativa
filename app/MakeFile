@@ -1,5 +1,5 @@
 Cxx = g++
-CxxFLAGS = -g3 -Wall
+CxxFLAGS = -std=c++11 -g3 -Wall
 
 LIBS = -lm
 

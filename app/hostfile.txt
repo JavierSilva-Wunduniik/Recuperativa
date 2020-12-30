@@ -1,0 +1,10 @@
+#configuracion de nodos
+#nodo1
+127.0.0.1
+#nodo2
+127.0.0.2
+#nodo3
+127.0.0.3
+
+
+
